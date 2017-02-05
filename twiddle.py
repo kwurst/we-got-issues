@@ -50,7 +50,7 @@ def twiddle(string):
 if __name__ == '__main__':
     p = float(sys.argv[1])
     in_filename = pathlib.Path(sys.argv[2])
-    out_filename = in_filename.with_name(in_filename.name + '.twiddled.yaml')
+    out_filename = in_filename.with_name(in_filename.name + '.twiddled')
     report_filename = in_filename.with_name(in_filename.name + '.report.yaml')
     key_filename = in_filename.with_name(in_filename.name + '.key.yaml')
     twiddle_file(p, in_filename, out_filename, report_filename, key_filename)
