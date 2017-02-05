@@ -4,25 +4,41 @@ import re
 import sys
 
 
-def twiddle_file(p, in_filename, out_filename, report_filename, key_filename):
-    line_number = 1
-    start_character = 1
-    with open(in_filename) as in_file, open(report_filename, 'w') as report_file, open(out_filename, 'w') as out_file, open(key_filename, 'w') as key_file:
-        for line in in_file:
-            start_character = 1
-            for token in re.split(r'(\s+)', line):
-                if is_twiddleable(token):
-                    if random.random() < p:
-                        try:
-                            twiddled = twiddle(token)
-                            report_file.write(str(line_number) + "," + str(start_character) + ": " + twiddled + '\n')
-                            key_file.write(str(line_number) + "," + str(start_character) + ": " + token + '\n')
-                            token = twiddled
-                        except Exception:
-                            print("Couldn't twiddle '" + token + "'")
-                out_file.write(token)
-                start_character += len(token)
-            line_number += 1
+def twiddle_file(p, filename):
+    out_fn, report_fn, key_fn = get_filenames(filename)
+    with open(filename) as in_f, open(out_fn, 'w') as out_f, open(report_fn, 'w') as report_f, open(key_fn, 'w') as key_f:
+        for line, char, token, twiddled in generate_twiddled_tokens(p, in_f):
+            if twiddled is not None:
+                report_f.write(f'{line},{char}: {twiddled}\n')
+                key_f.write(f'{line},{char}: {token}\n')
+                out_f.write(f'{twiddled}')
+            else:
+                out_f.write(f'{token}')
+
+
+def get_filenames(filename):
+    out_filename = filename.with_name(filename.name + '.twiddled')
+    report_filename = filename.with_name(filename.name + '.report.yaml')
+    key_filename = filename.with_name(filename.name + '.key.yaml')
+    return out_filename, report_filename, key_filename
+
+
+def generate_twiddled_tokens(p, in_f):
+    line_no = 1
+    for line in in_f:
+        char_no = 1
+        for token in re.split(r'(\s+)', line):
+            yield line_no, char_no, token, maybe_twiddle(p, token)
+            char_no += len(token)
+        line_no += 1
+
+
+def maybe_twiddle(p, token):
+    if random.random() >= p:
+        return None
+    if not is_twiddleable(token):
+        return None
+    return twiddle(token)
 
 
 def is_twiddleable(string):
@@ -43,14 +59,11 @@ def twiddle(string):
         if twiddled != string:
             break
     if twiddled == string:
-        raise Exception('Untwittleable?')
+        return None
     return twiddled
 
 
 if __name__ == '__main__':
     p = float(sys.argv[1])
-    in_filename = pathlib.Path(sys.argv[2])
-    out_filename = in_filename.with_name(in_filename.name + '.twiddled')
-    report_filename = in_filename.with_name(in_filename.name + '.report.yaml')
-    key_filename = in_filename.with_name(in_filename.name + '.key.yaml')
-    twiddle_file(p, in_filename, out_filename, report_filename, key_filename)
+    filename = pathlib.Path(sys.argv[2])
+    twiddle_file(p, filename)
