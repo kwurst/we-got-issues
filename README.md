@@ -1,35 +1,35 @@
 # git-twiddler
 
-A tool to generate an activity for students learning git and GitHub.
+`python twiddle.py P FILE`
 
+Scrambles random words in FILE. Each alphabetic word has a probability of P to
+be scrambled. Generates the following files:
 
-## twiddle.py
+- file.twiddled: The same as file with randomly selected words scrambled.
+- file.key.yaml: For each word scrambled, the line, position and the word.
+- file.report.yaml: For each word scrambled, the line, position and the
+  scrambled word.
 
-`python twiddle.py [--max=M] N FILE`
-
-Twiddles N words in FILE. If --max is given, maximum M words per line.
-Modifies FILE in place. Generates FILE.twiddles.yaml that lists the location and
-twiddle of each word twiddled. Generates FILE.originals.yaml that lists the
-location and original word for each word twiddled.
-
-For example
+# Example
 
 ```
-$ python twiddle.py 2 file
+$ python twiddle.py .2 file
 ```
 
-This generates file.twiddles.yaml
+This generates `file.report.yaml`
 
 ```
-$ cat file.twiddles.yaml
+$ cat file.report.yaml
 12, 24: dba
 14, 1: asd
 ```
 
-and file.originals.yaml
+and `file.key.yaml`
 
 ```
 $ cat file.originals.yaml
 12, 24: bad
 14, 1: sad
 ```
+
+and `file.twiddled`.
