@@ -1,48 +1,44 @@
+import pathlib
 import random
+import re
+import sys
 
 
-def twiddle_word(word):
-    if len(word) <= 1:
-        raise ValueError('word argument is too short to twiddle: {}'.format(word))
-    if all(x == word[0] for x in word):
-        raise ValueError('word argument has all the same letters: {}'.format(word))
-    if not all(x.isalpha() for x in word):
-        raise ValueError('word must contain only alphabetic characters: {}'.format(word))
-    result = ''.join(random.sample(word, len(word)))
-    while result == word:
-        result = ''.join(random.sample(word, len(word)))
-    return result
+def twiddle_file(p, in_filename, out_filename, report_filename, key_filename):
+    line_number = 1
+    start_character = 0
+    with open(in_filename) as in_file, open(report_filename, 'w') as report_file, open(out_filename, 'w') as out_file, open(key_filename, 'w') as key_file:
+        for line in in_file:
+            for token in re.split(r'(\s+)', line):
+                if not token.isspace() and token:
+                    if random.random() < p:
+                        try:
+                            twiddled = twiddle(token)
+                            report_file.write(str(line_number) + " " + twiddled + '\n')
+                            key_file.write(str(line_number) + " " + token + '\n')
+                            token = twiddled
+                        except Exception:
+                            print("Couldn't twiddle '" + token + "'")
+                out_file.write(token)
+            line_number += 1
 
 
-def twiddle_n_words(n, words):
-    seen = set()
-    original_n = n
-    while n:
-        try:
-            i = random.randint(0, len(words) - 1)
-            if i not in seen:
-                seen.add(i)
-                words[i] = twiddle_word(words[i])
-                n -= 1
-        except ValueError as e:
-            pass
-        if len(seen) + n > len(words):
-            raise ValueError('n is greater than the number of valid words to twiddle: n={}'.format(original_n))
+def twiddle(string):
+    for i in range(100):
+        string_list = list(string)
+        random.shuffle(string_list)
+        twiddled = ''.join(string_list)
+        if twiddled != string:
+            break
+    if twiddled == string:
+        raise Exception('Untwittleable?')
+    return twiddled
 
 
-def twiddle_n_words_in_lines(n, lines):
-    seen = set()
-    original_n = n
-    n_words = sum(len(l) for l in lines)
-    while n:
-        try:
-            l = random.randint(0, len(lines) - 1)
-            w = random.randint(0, len(lines[l]) - 1)
-            if (l, w) not in seen:
-                seen.add((l, w))
-                lines[l][w] = twiddle_word(lines[l][w])
-                n -= 1
-        except ValueError as e:
-            pass
-        if len(seen) + n > n_words:
-            raise ValueError('n is greater than the number of valid words to twiddle: n={}'.format(original_n))
+if __name__ == '__main__':
+    p = float(sys.argv[1])
+    in_filename = pathlib.Path(sys.argv[2])
+    out_filename = in_filename.with_name(in_filename.name + '.twiddled.yaml')
+    report_filename = in_filename.with_name(in_filename.name + '.report.yaml')
+    key_filename = in_filename.with_name(in_filename.name + '.key.yaml')
+    twiddle_file(p, in_filename, out_filename, report_filename, key_filename)
