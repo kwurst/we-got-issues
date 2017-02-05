@@ -13,23 +13,23 @@ be scrambled. Generates the following files:
 # Example
 
 ```
-$ python twiddle.py .2 file
+$ python twiddle.py .1 file
 ```
 
-This generates `file.report.yaml`
+Generates `file.twiddled` with the same content as `file` except that each
+alphabetic word is scrambled with a probability of 10% (.1). This command
+also generates `file.report.yaml`
 
 ```
 $ cat file.report.yaml
-12, 24: dba
-14, 1: asd
+12,24: dba
+14,1: asd
 ```
 
 and `file.key.yaml`
 
 ```
 $ cat file.originals.yaml
-12, 24: bad
-14, 1: sad
+12,24: bad
+14,1: sad
 ```
-
-and `file.twiddled`.
