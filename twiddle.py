@@ -10,7 +10,7 @@ def twiddle_file(p, in_filename, out_filename, report_filename, key_filename):
     with open(in_filename) as in_file, open(report_filename, 'w') as report_file, open(out_filename, 'w') as out_file, open(key_filename, 'w') as key_file:
         for line in in_file:
             for token in re.split(r'(\s+)', line):
-                if not token.isspace() and token:
+                if is_twiddleable(token):
                     if random.random() < p:
                         try:
                             twiddled = twiddle(token)
@@ -21,6 +21,16 @@ def twiddle_file(p, in_filename, out_filename, report_filename, key_filename):
                             print("Couldn't twiddle '" + token + "'")
                 out_file.write(token)
             line_number += 1
+
+
+def is_twiddleable(string):
+    if string is None:
+        return False
+    if re.fullmatch('(.)\1*', string) is not None:
+        return False
+    if re.fullmatch(r'[a-zA-Z]+', string) is None:
+        return False
+    return True
 
 
 def twiddle(string):
