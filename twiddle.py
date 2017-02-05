@@ -6,20 +6,22 @@ import sys
 
 def twiddle_file(p, in_filename, out_filename, report_filename, key_filename):
     line_number = 1
-    start_character = 0
+    start_character = 1
     with open(in_filename) as in_file, open(report_filename, 'w') as report_file, open(out_filename, 'w') as out_file, open(key_filename, 'w') as key_file:
         for line in in_file:
+            start_character = 1
             for token in re.split(r'(\s+)', line):
                 if is_twiddleable(token):
                     if random.random() < p:
                         try:
                             twiddled = twiddle(token)
-                            report_file.write(str(line_number) + " " + twiddled + '\n')
-                            key_file.write(str(line_number) + " " + token + '\n')
+                            report_file.write(str(line_number) + "," + str(start_character) + ": " + twiddled + '\n')
+                            key_file.write(str(line_number) + "," + str(start_character) + ": " + token + '\n')
                             token = twiddled
                         except Exception:
                             print("Couldn't twiddle '" + token + "'")
                 out_file.write(token)
+                start_character += len(token)
             line_number += 1
 
 
