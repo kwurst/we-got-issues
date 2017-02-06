@@ -8,7 +8,7 @@ Generates a FILE.TWIDDLED with the contents of FILE with random words twiddled
 - FILE.TWIDDLED: The same as file with randomly words twiddled.
 - FILE.INCIDENTS: Contains information about each twiddled word.
 
-# Example
+## Example
 
 ```
 $ python twiddle.py .1 LICENSE
