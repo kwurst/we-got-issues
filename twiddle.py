@@ -4,66 +4,88 @@ import re
 import sys
 
 
-def twiddle_file(p, filename):
-    out_fn, report_fn, key_fn = get_filenames(filename)
-    with open(filename) as in_f, open(out_fn, 'w') as out_f, open(report_fn, 'w') as report_f, open(key_fn, 'w') as key_f:
-        for line, char, token, twiddled in generate_twiddled_tokens(p, in_f):
-            if twiddled is not None:
-                report_f.write(f'{line},{char}: {twiddled}\n')
-                key_f.write(f'{line},{char}: {token}\n')
-                out_f.write(f'{twiddled}')
+def main():
+    probability_word_is_twiddled = float(sys.argv[1])
+    file_path = pathlib.Path(sys.argv[2])
+    twiddled_path = append_to_path(file_path, '.TWIDDLED')
+    incidents_path = append_to_path(file_path, '.INCIDENTS')
+    lines = read_lines(file_path)
+    tokens = tokenize_lines(lines)
+    tokens = twiddle_random_words(probability_word_is_twiddled, tokens)
+    with open(twiddled_path, 'w') as twiddled_file, open(incidents_path, 'w') as incidents_file:
+        for t in tokens:
+            if t.is_twiddled():
+                string = t.get_twiddled()
+                incidents_file.write(t.get_incident_string() + '\n')
             else:
-                out_f.write(f'{token}')
+                string = t.get_string()
+            twiddled_file.write(string)
 
 
-def get_filenames(filename):
-    out_filename = filename.with_name(filename.name + '.twiddled')
-    report_filename = filename.with_name(filename.name + '.report.yaml')
-    key_filename = filename.with_name(filename.name + '.key.yaml')
-    return out_filename, report_filename, key_filename
+def append_to_path(file_path, string):
+    return file_path.with_name(file_path.name + string)
 
 
-def generate_twiddled_tokens(p, in_f):
-    line_no = 1
-    for line in in_f:
-        char_no = 1
-        for token in re.split(r'(\s+)', line):
-            yield line_no, char_no, token, maybe_twiddle(p, token)
-            char_no += len(token)
-        line_no += 1
+def read_lines(filename):
+    with open(filename) as f:
+        for line in f:
+            yield line
 
 
-def maybe_twiddle(p, token):
-    if random.random() >= p:
-        return None
-    if not is_twiddleable(token):
-        return None
-    return twiddle(token)
+def tokenize_lines(lines):
+    for line_number, line in enumerate(lines, start=1):
+        character_number = 1
+        for string in re.split(r'(\s+)', line):
+            yield Token(line_number, character_number, string)
+            character_number += len(string)
 
 
-def is_twiddleable(string):
-    if string is None:
-        return False
-    if re.fullmatch('(.)\1*', string) is not None:
-        return False
-    if re.fullmatch(r'[a-zA-Z]+', string) is None:
-        return False
-    return True
+def twiddle_random_words(probability_word_is_twiddled, tokens):
+    for token in tokens:
+        if token.is_tiddleable():
+            if random.random() < probability_word_is_twiddled:
+                token.try_to_twiddle()
+        yield token
 
 
-def twiddle(string):
-    for i in range(100):
-        string_list = list(string)
-        random.shuffle(string_list)
-        twiddled = ''.join(string_list)
-        if twiddled != string:
-            break
-    if twiddled == string:
-        return None
-    return twiddled
+class Token:
+    def __init__(self, line_number, character_number, string):
+        self._line_number = line_number
+        self._character_number = character_number
+        self._string = string
+        self._twiddled = None
+
+    def is_tiddleable(self):
+        if self._string is None:
+            return False
+        if re.fullmatch('(.)\1*', self._string) is not None:
+            return False
+        if re.fullmatch(r'[a-zA-Z]+', self._string) is None:
+            return False
+        return True
+
+    def try_to_twiddle(self):
+        for i in range(100):
+            string_list = list(self._string)
+            random.shuffle(string_list)
+            self._twiddled = ''.join(string_list)
+            if self._twiddled != self._string:
+                break
+        if self._twiddled == self._string:
+            self._twiddled = None
+
+    def is_twiddled(self):
+        return self._twiddled is not None
+
+    def get_string(self):
+        return self._string
+
+    def get_twiddled(self):
+        return self._twiddled
+
+    def get_incident_string(self):
+        return f'- {{line: {self._line_number}, character: {self._character_number}, twiddled: {self._twiddled}, string: {self._string}}}'
 
 
 if __name__ == '__main__':
-    p = float(sys.argv[1])
-    filename = pathlib.Path(sys.argv[2])
-    twiddle_file(p, filename)
+    main()
