@@ -45,8 +45,9 @@ Misspelled word in FILE
 The user will be given a time estimate and the chance to continue or abort.*
 
 Dependencies:
-- pyGithub
-- pyYAML
+- pyGithub - for GitHub API access
+- pyYAML - for reading YAML-based incident file
+- tqdm - for progress bar
 
 ## Example
 

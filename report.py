@@ -1,5 +1,6 @@
 from github import Github
 from getpass import getpass
+from tqdm import tqdm
 import yaml
 import sys
 import pathlib
@@ -20,7 +21,7 @@ def main():
         print('Due to GitHub API limits, this will take '+ str(len(incidents)/60) + ' minutes to complete.')
         response = input('Do you want to report these issues [y]/n? ')
         if len(response) == 0 or response[0].lower() == 'y':
-            for incident in incidents:
+            for incident in tqdm(incidents):
                 issue_title = 'Misspelled word in ' + str(file_path)
                 issue_comment = 'On line number ' + str(incident['line']) + \
                                 ', the misspelled word "' + str(incident['twiddled']) + \
