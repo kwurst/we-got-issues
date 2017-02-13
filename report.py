@@ -18,7 +18,7 @@ def main():
 
     with open(incidents_path, 'r') as stream:
         incidents = yaml.load(stream)
-        print('Due to GitHub API limits, this will take '+ str(len(incidents)/60) + ' minutes to complete.')
+        print('Due to GitHub API limits, this will take '+ str(len(incidents)*3/60) + ' minutes to complete.')
         response = input('Do you want to report these issues [y]/n? ')
         if len(response) == 0 or response[0].lower() == 'y':
             for incident in tqdm(incidents):
@@ -27,7 +27,7 @@ def main():
                                 ', the misspelled word "' + str(incident['twiddled']) + \
                                 '" was found.'
                 repository.create_issue(issue_title, issue_comment)
-                time.sleep(1)  # rate-limit the requests so we don't run afoul of GitHub's API limits
+                time.sleep(3)  # rate-limit the requests so we don't run afoul of GitHub's API limits
         else:
             print('No issues reported')
 

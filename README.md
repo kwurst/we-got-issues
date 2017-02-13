@@ -41,7 +41,7 @@ Misspelled word in FILE
     On line number ###, the misspelled word "xxxxxxxx" was found.
 ```
 
-*Note: Due to GitHub API rate limits, this will take 1 second per issue to report.
+*Note: Due to GitHub API rate limits, this will take 3 seconds per issue to report.
 The user will be given a time estimate and the chance to continue or abort.*
 
 Dependencies:
